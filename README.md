@@ -5,6 +5,8 @@ MASynReas diagnoses anomalies in telecom and IT networks represented as knowledg
 Collective Scientific Project (PSC) at École Polytechnique in collaboration with **Orange Research**, 2025–2026.
 Team: Andrea Signoretti, Paul Chiche, Raphaël des Boscs, Qile Liu.
 
+📄 **Full report:** [`reports/final_report.pdf`](reports/final_report.pdf)
+
 ## Architecture
 
 ```mermaid
@@ -44,21 +46,19 @@ The system runs in two modes:
 
 ## Key results
 
-Experiments on noria-0.2, Orange's reference network knowledge graph (3,152 triples). Details in [EXPERIMENTS.md](EXPERIMENTS.md).
+Results from the [final report](reports/final_report.pdf), on noria-0.2 (Orange's reference network knowledge graph, 3,152 triples) and on the 27-scenario synthetic catalogue in [`datasets/`](datasets/README.md).
 
-**Correlating facts before the LLM makes its diagnoses reliable.** Ablation over 5 incident scenarios × 5 runs with `llama3.1:8b`:
+**Accurate, well-ranked diagnoses on incident scenarios.** On the synthetic catalogue, the level-2 diagnosers reach an F1 of **0.815** in a posteriori mode (precision 0.825, recall 0.808). On scenarios with several true diagnoses, the main one is always ranked first (top-1 accuracy 1.00, MRR 0.833), and the four noisy or incomplete-data scenarios are all handled correctly (F1 1.00). A priori mode is weaker (F1 0.196), mostly because one diagnoser (`procedural_unreadiness`) fires too broadly.
 
-| LLM input | Hallucination ↓ | Conformity to ground truth ↑ | Correct severity ↑ |
-|---|:---:|:---:|:---:|
-| Ticket text only | 0.00 | 0.60 | 100% |
-| Raw level-1 findings | 0.05 | 0.53 | 60% |
-| **Level-1 findings + level-2 diagnoses** | **0.00** | **0.87** | **100%** |
+**The multi-agent system beats an LLM at its own job.** Asked to name which of the 12 diagnosers should fire, Mistral-7B-Instruct reaches at best F1 0.508 in a posteriori mode, even when given the level-1 and level-2 outputs, against 0.815 for the multi-agent system. As a level-1 detector, the LLM finds at most 21% of the anomalies, and at most 6% of the a priori ones, which are defined by something missing in the graph.
 
-Raw, uncorrelated findings actually make the LLM *worse* than the ticket alone: it over-diagnoses severity on multi-signal incidents. Adding the level-2 correlation fixes this.
+**Correlating facts before the LLM makes its reports more reliable.** For narrative synthesis (Mistral-7B-Instruct, 5 scenarios × 3 runs), conformity to the ground truth rises from 0.31 with the graph alone to 0.53 with level-1 findings and **0.78** with level-1 findings + level-2 diagnoses. Raw level-1 findings also bring more hallucinations and worse severity calibration; adding level 2 halves the hallucinations and restores the severity calibration.
 
 **The four agent families are complementary.** In a priori mode, each family detects entities that no other family sees, and the overlaps (e.g. applications flagged by both structural and functional detectors) are exactly what level 2 merges into a single diagnosis.
 
-**Independent agents parallelize well.** Running all detectors sequentially takes 4.9 s (a priori) and 6.5 s (a posteriori), against under 0.4 s for the slowest single detector: a theoretical speedup of 12.6× and 18.7×.
+**Independent agents parallelize well.** Running all detectors sequentially takes 4.9 s (a priori) and 6.5 s (a posteriori), against under 0.4 s for the slowest single detector: a theoretical speedup of 12.6× and 18.7×. The full pipeline runs in under 7 s on the synthetic graphs.
+
+This repository contains the scripts for the noria-0.2 experiments (family complementarity, sequential baseline, and a local CPU version of the ablation with `llama3.1:8b`), documented in [EXPERIMENTS.md](EXPERIMENTS.md). The synthetic-catalogue evaluation and the GPU comparisons with Mistral-7B are described in the report.
 
 ## Benchmark catalogue
 
@@ -75,6 +75,7 @@ Raw, uncorrelated findings actually make the LLM *worse* than the ticket alone: 
 | [`datasets/`](datasets/README.md) | Reference graphs and the 27-scenario benchmark |
 | `results/` | JSON outputs of the last run (one file per agent) |
 | `run_all_detectors.py`, `complementarity_table.py`, `ablation_study.py`, `baseline_monoagent.py` | Experiment scripts, documented in [EXPERIMENTS.md](EXPERIMENTS.md) |
+| [`reports/`](reports/final_report.pdf) | Final report (PDF) |
 
 ## Getting started
 

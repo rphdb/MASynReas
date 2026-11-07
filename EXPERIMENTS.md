@@ -1,5 +1,7 @@
 # Experiments
 
+These are the experiments reproducible with the scripts in this repository. The full evaluation, including the 27-scenario synthetic catalogue and the comparisons with an LLM detector and classifier, is in the [final report](reports/final_report.pdf).
+
 All experiments were run on **noria-0.2**, the reference knowledge graph provided by Orange for network diagnosis (3,152 RDF triples covering the four facets of the [NORIA-O](https://github.com/Orange-OpenSource/noria-ontology) ontology), loaded in a local Virtuoso SPARQL endpoint (`localhost:8890`).
 
 The reference incident is a software failure on resource `RES_TOY_as2` (L2 table overflow), which cuts access to application `APP_TOY_PFS01` and propagates to `RES_TOY_srv1`.
@@ -49,6 +51,8 @@ On noria-0.2, only the functional family fires in a posteriori mode: the trouble
 ## 2. Ablation study: what does each layer add to the LLM?
 
 **Question:** if an LLM is available, what is the multi-agent system for?
+
+> This section reports a local CPU run of the ablation with `llama3.1:8b`, reproducible with `ablation_study.py`. The [final report](reports/final_report.pdf) presents a later GPU run with Mistral-7B-Instruct-v0.3 (3 runs per condition, slightly different metric definitions and the graph rather than the ticket text as baseline input), where conformity rises from 0.31 (graph only) to 0.53 (+ level 1) and 0.78 (+ level 1 + level 2).
 
 ### Protocol
 
