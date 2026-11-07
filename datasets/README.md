@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This folder is intended to host the future toy dataset catalogue used to evaluate MASynReas.
+This folder contains the synthetic benchmark catalogue used to evaluate MASynReas: 27 scenarios (`DS01` to `DS27`) derived from two reference knowledge graphs.
 
 The catalogue is designed to support the KPI framework defined for the project, especially:
 - false positive control
@@ -22,15 +22,14 @@ The catalogue is designed to support the KPI framework defined for the project, 
 
 The guiding principle is to build datasets from a small number of coherent reference graphs, then derive scenario datasets by controlled anomaly injection, data removal, or noise addition.
 
-Current materialization status:
-- the full scenario catalogue `DS01` to `DS27` is now present on disk
-- each scenario folder contains:
-- `dataset.ttl`
-- `README.md`
-- `manifest.json`
-- `expected_level1.json`
-- `expected_level2.json`
-- the catalogue can be regenerated with [generate_catalogue.ps1](C:/Users/rdesb/psc/MASynReas/datasets/generate_catalogue.ps1)
+Each scenario folder contains:
+- `dataset.ttl`: the scenario graph (Turtle)
+- `README.md`: purpose, base graph and mutation profile
+- `manifest.json`: base graph, mode, mutation profile, KPI targets and expected summary
+- `expected_level1.json`: expected detector outputs
+- `expected_level2.json`: expected diagnoses
+
+The whole catalogue can be regenerated with [generate_catalogue.ps1](generate_catalogue.ps1)
 
 ## Reference Graphs
 
@@ -38,7 +37,7 @@ Current materialization status:
 
 `Base A` is the main small coherent reference graph.
 
-It merges the roles that were initially planned for:
+It serves as the clean control graph for both modes:
 - the clean `apriori` control graph
 - the clean `aposteriori` control graph
 
@@ -49,8 +48,8 @@ So one same healthy graph will support:
 - several integrated anomaly scenarios derived by mutation
 
 Materialized files:
-- [Base A README](C:/Users/rdesb/psc/MASynReas/datasets/baseA/README.md)
-- [baseA.ttl](C:/Users/rdesb/psc/MASynReas/datasets/baseA/baseA.ttl)
+- [Base A README](baseA/README.md)
+- [baseA.ttl](baseA/baseA.ttl)
 
 ### Base B
 
@@ -64,12 +63,12 @@ It is intended mainly for:
 - scalability experiments
 
 Materialized files:
-- [Base B README](C:/Users/rdesb/psc/MASynReas/datasets/baseB/README.md)
-- [baseB.ttl](C:/Users/rdesb/psc/MASynReas/datasets/baseB/baseB.ttl)
+- [Base B README](baseB/README.md)
+- [baseB.ttl](baseB/baseB.ttl)
 
 ## Catalogue Structure
 
-The current planned catalogue contains 27 scenarios:
+The catalogue contains 27 scenarios:
 - 3 control / activation scenarios
 - 7 integrated `apriori` diagnosis scenarios
 - 8 integrated `aposteriori` diagnosis scenarios
@@ -95,9 +94,9 @@ Main KPI targets:
 - traceability sanity check
 
 Materialized files:
-- [DS01 README](C:/Users/rdesb/psc/MASynReas/datasets/DS01_clean_baseA/README.md)
-- [DS01 graph](C:/Users/rdesb/psc/MASynReas/datasets/DS01_clean_baseA/dataset.ttl)
-- [DS01 manifest](C:/Users/rdesb/psc/MASynReas/datasets/DS01_clean_baseA/manifest.json)
+- [DS01 README](DS01_clean_baseA/README.md)
+- [DS01 graph](DS01_clean_baseA/dataset.ttl)
+- [DS01 manifest](DS01_clean_baseA/manifest.json)
 
 #### `DS02_partial_evidence_no_l2_v1`
 
@@ -427,24 +426,11 @@ The present catalogue is mainly intended for:
 - calibration analysis
 - family contribution analysis
 
-### Scenario Specification to Add Later
-
-For each dataset scenario, the future generated files should eventually be accompanied by:
-- a dataset identifier
-- the reference base graph used
-- the list of injected anomalies
-- the list of removed relations or attributes if relevant
-- the list of noisy additions if relevant
-- the expected level-1 outputs
-- the expected activated level-2 agents
-- the expected true level-2 diagnoses
-- the expected urgency ordering when relevant
-
 ### Naming Convention
 
 The current dataset identifiers are stable scenario names.
 
-When datasets are materialized, a practical convention could be:
+Scenario folders follow the `DSxx_<short_description>` convention:
 
 ```text
 datasets/
@@ -453,9 +439,3 @@ datasets/
   DS03_partial_evidence_no_l2_v2/
   ...
 ```
-
-Each scenario folder could then contain:
-- the graph files
-- a manifest
-- expected outputs
-- KPI annotations

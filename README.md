@@ -1,140 +1,113 @@
-# MASynReas
+# MASynReas: Multi-Agent Synergistic Reasoning for Network Anomaly Diagnosis
 
-MASynReas is a multi-agent system for anomaly diagnosis in a knowledge graph representing an ICT or telecommunication network.
+MASynReas diagnoses anomalies in telecom and IT networks represented as knowledge graphs. Symbolic agents query the graph with SPARQL, detect elementary anomaly patterns and correlate them into ranked diagnoses; a local LLM only turns the final diagnosis into a readable report. Every conclusion can be traced back to the graph facts that support it.
 
-The project is implemented with:
-- JaCaMo for the multi-agent system
-- Python scripts for SPARQL query execution
-- OpenLink Virtuoso as the SPARQL endpoint
-- NORIA-O as the ontology used to structure the graph
+Collective Scientific Project (PSC) at École Polytechnique in collaboration with **Orange Research**, 2025–2026.
+Team: Andrea Signoretti, Paul Chiche, Raphaël des Boscs, Qile Liu.
 
 ## Architecture
 
-The system is organized in three layers:
+```mermaid
+flowchart LR
+    KG[("Network knowledge graph<br/>NORIA-O ontology<br/>Virtuoso SPARQL endpoint")]
+    subgraph L1["Level 1 · 54 detector agents"]
+        direction TB
+        S[Structural]
+        D[Dynamic]
+        F[Functional]
+        P[Procedural]
+    end
+    L2["Level 2 · 12 diagnoser agents<br/>correlate evidence on shared entities<br/>score reliability, severity, priority"]
+    L3["Level 3 · local LLM<br/>natural-language report"]
+    KG -- "one SPARQL query per agent" --> L1
+    L1 -- "JSON findings" --> L2
+    L2 -- "ranked diagnoses" --> L3
+```
 
-- **Level 1 - Detector agents**: one elementary pattern per agent, one SPARQL query per agent, one JSON result file per agent
-- **Level 2 - Diagnoser agents**: deterministic aggregation of level-1 outputs into higher-level diagnoses
-- **Level 3 - Narrative synthesis**: natural-language interpretation of the diagnosis
+- **Level 1, detection.** 54 agents, one anomaly pattern and one SPARQL query each, organized along the four facets of the [NORIA-O](https://github.com/Orange-OpenSource/noria-ontology) ontology: structural (resources, links, interfaces), dynamic (events, changes), functional (applications, services) and procedural (tickets, procedures).
+- **Level 2, diagnosis.** 12 deterministic agents read selected level-1 outputs, check activation conditions, correlate evidence on shared entities, and output a diagnosis with reliability, severity and priority scores (e.g. single point of failure, change-induced incident, service cascade).
+- **Level 3, narrative synthesis.** A local LLM (Ollama) writes the final report from the level-2 diagnoses: it explains the decision, it does not make it. In this repository, this layer is implemented and evaluated in the ablation study (`ablation_study.py`) rather than as an agent of the JaCaMo system.
 
-### Level 1 families
+The system runs in two modes:
 
-| Family | Apriori agents | Aposteriori agents |
-|--------|:--------------:|:-----------------:|
+| Mode | Purpose | Detectors | Diagnosers |
+|---|---|:---:|:---:|
+| `apriori` | Find structural weaknesses before any incident | 23 | 5 |
+| `aposteriori` | Explain causes and propagation once incidents, events or tickets exist | 31 | 7 |
+
+| Family | A priori detectors | A posteriori detectors |
+|---|:---:|:---:|
 | Structural | 10 | 7 |
 | Dynamic | 3 | 12 |
 | Functional | 7 | 9 |
 | Procedural | 3 | 3 |
 
-Level 1 currently represents **54 detector agents**.
+## Key results
 
-### Level 2 catalogue
+Experiments on noria-0.2, Orange's reference network knowledge graph (3,152 triples). Details in [EXPERIMENTS.md](EXPERIMENTS.md).
 
-Level 2 is no longer a small flat prototype. It is now organized by execution mode:
+**Correlating facts before the LLM makes its diagnoses reliable.** Ablation over 5 incident scenarios × 5 runs with `llama3.1:8b`:
 
-- `src/agt/level2/apriori`
-- `src/agt/level2/aposteriori`
+| LLM input | Hallucination ↓ | Conformity to ground truth ↑ | Correct severity ↑ |
+|---|:---:|:---:|:---:|
+| Ticket text only | 0.00 | 0.60 | 100% |
+| Raw level-1 findings | 0.05 | 0.53 | 60% |
+| **Level-1 findings + level-2 diagnoses** | **0.00** | **0.87** | **100%** |
 
-#### A priori diagnosers
+Raw, uncorrelated findings actually make the LLM *worse* than the ticket alone: it over-diagnoses severity on multi-signal incidents. Adding the level-2 correlation fixes this.
 
-- `structural_fragility_diagnoser`
-- `critical_service_exposure_diagnoser`
-- `observability_gap_diagnoser`
-- `procedural_unreadiness_diagnoser`
-- `functional_mapping_gap_diagnoser`
+**The four agent families are complementary.** In a priori mode, each family detects entities that no other family sees, and the overlaps (e.g. applications flagged by both structural and functional detectors) are exactly what level 2 merges into a single diagnosis.
 
-#### A posteriori diagnosers
+**Independent agents parallelize well.** Running all detectors sequentially takes 4.9 s (a priori) and 6.5 s (a posteriori), against under 0.4 s for the slowest single detector: a theoretical speedup of 12.6× and 18.7×.
 
-- `single_point_of_failure_diagnoser`
-- `change_induced_incident_diagnoser`
-- `service_cascade_diagnoser`
-- `traceability_breakdown_diagnoser`
-- `unstable_component_diagnoser`
-- `application_support_failure_diagnoser`
-- `local_infrastructure_cluster_diagnoser`
+## Benchmark catalogue
 
-Level 2 therefore currently contains **12 diagnoser agents**.
+[`datasets/`](datasets/README.md) contains 27 synthetic scenarios (DS01–DS27) built from two reference graphs by controlled anomaly injection, data removal and noise. Each scenario comes with its graph (Turtle) and the expected level-1 and level-2 outputs. They cover clean controls, partial evidence (no diagnosis expected), each a priori and a posteriori diagnosis, robustness to missing and noisy data, ranking of several true diagnoses, score calibration and scalability.
 
-Each level-2 agent:
-- reads a selected set of level-1 JSON result files
-- checks deterministic activation conditions
-- correlates evidence on shared anchors
-- computes reliability, severity, and priority scores
-- writes one diagnosis JSON file under `results/level2/<mode>/`
+## Repository structure
 
-See [src/agt/level2/README.md](C:/Users/rdesb/psc/MASynReas/src/agt/level2/README.md) for the detailed level-2 architecture.
+| Path | Content |
+|---|---|
+| [`multiagentSystem.jcm`](multiagentSystem.jcm) | JaCaMo entry point: agents and environment |
+| [`mas.properties`](mas.properties) | Execution mode and Python interpreter |
+| [`src/agt/`](src/agt) | Agents: one folder per family ([structural](src/agt/structural/README.md), [dynamic](src/agt/dynamic/README.md), [functional](src/agt/functional/README.md), [procedural](src/agt/procedural/README.md)) and [level 2](src/agt/level2/README.md). Each agent is a Jason `.asl` file plus a Python script holding its SPARQL query |
+| [`src/env/env/PythonExecArtifact.java`](src/env/env/PythonExecArtifact.java) | CArtAgO artifact that runs the Python detectors from the agents |
+| [`datasets/`](datasets/README.md) | Reference graphs and the 27-scenario benchmark |
+| `results/` | JSON outputs of the last run (one file per agent) |
+| `run_all_detectors.py`, `complementarity_table.py`, `ablation_study.py`, `baseline_monoagent.py` | Experiment scripts, documented in [EXPERIMENTS.md](EXPERIMENTS.md) |
 
-## Execution Modes
+## Getting started
 
-The MAS can be launched in two modes:
+### Requirements
 
-- `apriori`: diagnoses weaknesses independently from any explicit incident context
-- `aposteriori`: diagnoses anomaly causes and propagation after incidents, events, or tickets exist
+- Java 11+ and the [JaCaMo](https://jacamo-lang.github.io/) CLI in your `PATH`
+- Python 3.8+ with `pip install -r requirements.txt`
+- [OpenLink Virtuoso](https://vos.openlinksw.com/owiki/wiki/VOS) running on `http://localhost:8890/sparql`, with a NORIA-O graph loaded (noria-0.2, or any `dataset.ttl` from `datasets/`)
+- For the ablation study only: [Ollama](https://ollama.com/) with `llama3.1:8b`
 
-The selected mode is configured in `mas.properties`:
+### Run the multi-agent system
+
+Choose the mode in `mas.properties`:
 
 ```properties
-mode=apriori
-python.path=C:/path/to/python.exe
+mode=apriori        # or aposteriori
+python.path=        # empty = use python/python3 from PATH
 ```
 
-Accepted values are `apriori` and `aposteriori`.
+Then, from the project root:
 
-## Running the MAS
-
-From the project root:
-
-```powershell
+```bash
 jacamo multiagentSystem.jcm
 ```
 
-Execution flow:
+The selected mode activates its level-1 detectors, which write their findings to `results/<family>/<mode>/`. Once all of them have finished, `level2_controller` launches the diagnosers of the same mode, which write to `results/level2/<mode>/`.
 
-1. The selected mode activates the corresponding level-1 agents.
-2. Level-1 agents write their JSON results in `results/<family>/<mode>/`.
-3. `level2_controller` waits for all level-1 scripts of the selected mode.
-4. The controller launches only the level-2 diagnosers of the same mode.
+### Run the experiments
 
-Current mode-specific behavior:
-
-- In `apriori` mode, the MAS stops automatically after the 5 level-2 a priori diagnosers complete.
-- In `aposteriori` mode, the 7 level-2 a posteriori diagnosers run after the full level-1 catalogue of that mode.
-
-## Running Experiments
-
-```powershell
+```bash
 python -X utf8 run_all_detectors.py both
 python -X utf8 complementarity_table.py
 python -X utf8 ablation_study.py
 ```
 
-See `EXPERIMENTS_README.md` for the experiment-oriented documentation.
-
-## Requirements
-
-### Java / JaCaMo
-
-- JaCaMo CLI available in `PATH`
-- Java 11+
-
-### Python
-
-- Python 3.8+
-- `requests`
-- `SPARQLWrapper`
-
-### SPARQL endpoint
-
-- Virtuoso running on `http://localhost:8890/sparql`
-- NORIA-O dataset loaded in the endpoint
-
-### Level 3 synthesis
-
-If you use the narrative synthesis layer, configure the local LLM runtime expected by the project.
-
-## Main entry files
-
-- [multiagentSystem.jcm](C:/Users/rdesb/psc/MASynReas/multiagentSystem.jcm)
-- [mas.properties](C:/Users/rdesb/psc/MASynReas/mas.properties)
-- [src/env/env/PythonExecArtifact.java](C:/Users/rdesb/psc/MASynReas/src/env/env/PythonExecArtifact.java)
-- [src/agt/level2/README.md](C:/Users/rdesb/psc/MASynReas/src/agt/level2/README.md)
-- [EXPERIMENTS_README.md](C:/Users/rdesb/psc/MASynReas/EXPERIMENTS_README.md)
+(`-X utf8` is only needed on Windows.)

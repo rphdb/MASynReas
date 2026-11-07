@@ -7,7 +7,7 @@ This scenario introduces a very small number of isolated weak signals. It is int
 ## Relation to the Reference Graphs
 
 This scenario is derived from:
-- [Base A](C:/Users/rdesb/psc/MASynReas/datasets/baseA/README.md)
+- [Base A](../baseA/README.md)
 
 Mode:
 - both

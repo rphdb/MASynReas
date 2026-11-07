@@ -7,7 +7,7 @@ This scenario extends the partial-evidence family with several weak signals on d
 ## Relation to the Reference Graphs
 
 This scenario is derived from:
-- [Base A](C:/Users/rdesb/psc/MASynReas/datasets/baseA/README.md)
+- [Base A](../baseA/README.md)
 
 Mode:
 - both

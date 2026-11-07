@@ -7,7 +7,7 @@ This scenario creates the basic form of critical service exposure by reducing a 
 ## Relation to the Reference Graphs
 
 This scenario is derived from:
-- [Base A](C:/Users/rdesb/psc/MASynReas/datasets/baseA/README.md)
+- [Base A](../baseA/README.md)
 
 Mode:
 - apriori

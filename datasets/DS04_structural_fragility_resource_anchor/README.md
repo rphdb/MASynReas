@@ -7,7 +7,7 @@ This scenario is the first integrated apriori diagnosis case. A single resource 
 ## Relation to the Reference Graphs
 
 This scenario is derived from:
-- [Base A](C:/Users/rdesb/psc/MASynReas/datasets/baseA/README.md)
+- [Base A](../baseA/README.md)
 
 Mode:
 - apriori

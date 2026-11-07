@@ -221,9 +221,9 @@ function Get-BaseReferenceLink {
     param([string]$BaseGraph)
 
     if ($BaseGraph -eq "baseA") {
-        return "[Base A](C:/Users/rdesb/psc/MASynReas/datasets/baseA/README.md)"
+        return "[Base A](../baseA/README.md)"
     }
-    return "[Base B](C:/Users/rdesb/psc/MASynReas/datasets/baseB/README.md)"
+    return "[Base B](../baseB/README.md)"
 }
 
 function Build-ScenarioReadme {

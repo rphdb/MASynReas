@@ -7,7 +7,7 @@ This scenario combines missing scheduled change metadata, a ticket without assig
 ## Relation to the Reference Graphs
 
 This scenario is derived from:
-- [Base A](C:/Users/rdesb/psc/MASynReas/datasets/baseA/README.md)
+- [Base A](../baseA/README.md)
 
 Mode:
 - apriori

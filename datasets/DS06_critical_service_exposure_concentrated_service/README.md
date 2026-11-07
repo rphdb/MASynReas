@@ -7,7 +7,7 @@ This scenario is a stronger version of DS05. The same critical application is le
 ## Relation to the Reference Graphs
 
 This scenario is derived from:
-- [Base A](C:/Users/rdesb/psc/MASynReas/datasets/baseA/README.md)
+- [Base A](../baseA/README.md)
 
 Mode:
 - apriori

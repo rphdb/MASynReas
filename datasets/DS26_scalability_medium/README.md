@@ -7,7 +7,7 @@ This scenario is the medium clean graph used as the second point of the scalabil
 ## Relation to the Reference Graphs
 
 This scenario is derived from:
-- [Base B](C:/Users/rdesb/psc/MASynReas/datasets/baseB/README.md)
+- [Base B](../baseB/README.md)
 
 Mode:
 - both

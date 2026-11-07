@@ -7,7 +7,7 @@ This scenario is the clean benchmark control of the catalogue. It keeps the heal
 ## Relation to the Reference Graphs
 
 This scenario is derived from:
-- [Base A](C:/Users/rdesb/psc/MASynReas/datasets/baseA/README.md)
+- [Base A](../baseA/README.md)
 
 Mode:
 - both

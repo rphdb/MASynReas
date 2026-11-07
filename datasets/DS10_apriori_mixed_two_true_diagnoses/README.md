@@ -7,7 +7,7 @@ This scenario is the first mixed apriori benchmark. One part of the graph should
 ## Relation to the Reference Graphs
 
 This scenario is derived from:
-- [Base A](C:/Users/rdesb/psc/MASynReas/datasets/baseA/README.md)
+- [Base A](../baseA/README.md)
 
 Mode:
 - apriori

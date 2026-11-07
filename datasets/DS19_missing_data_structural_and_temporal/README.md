@@ -7,7 +7,7 @@ This robustness scenario removes a few key structural and temporal facts from an
 ## Relation to the Reference Graphs
 
 This scenario is derived from:
-- [Base B](C:/Users/rdesb/psc/MASynReas/datasets/baseB/README.md)
+- [Base B](../baseB/README.md)
 
 Mode:
 - both

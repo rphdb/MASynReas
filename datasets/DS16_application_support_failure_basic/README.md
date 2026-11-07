@@ -7,7 +7,7 @@ This scenario removes the visible support resources of one application while kee
 ## Relation to the Reference Graphs
 
 This scenario is derived from:
-- [Base B](C:/Users/rdesb/psc/MASynReas/datasets/baseB/README.md)
+- [Base B](../baseB/README.md)
 
 Mode:
 - aposteriori
